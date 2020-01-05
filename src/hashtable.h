@@ -18,11 +18,17 @@
 // process code segment integrity data array element
 // indexed by pid
 typedef struct proc_hash {
-    unsigned long start_code;  // start of code segment
-    size_t length;             // length of code segment
-    unsigned long count;       // hashcount runs counter
-    unsigned long siphash;     // process code segment gasg value
+    uint8_t* start_code;   // start of code segment
+    uint8_t* text;         // code segment in kernel space
+    size_t length;         // length of code segment
+    unsigned long count;   // hashcount runs counter
+    unsigned long siphash; // process code segment hash value
+    unsigned long siphash_old; // process code segment old hash value
+    char comm[TASK_COMM_LEN]; // task name
 } prochash_t;
+
+int init_ph(prochash_t *ph, struct task_struct *task);
+void cleanup_and_dump_hashtable(prochash_t* ph_table);
 
 #endif // #ifndef __HASHTABLE_H__
 

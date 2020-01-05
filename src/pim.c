@@ -7,47 +7,44 @@
 #include <linux/mm.h>
 #include <linux/time.h>
 #include <linux/delay.h>
+#include <linux/random.h>
+#include <linux/uaccess.h>
+
 #include "timing.h"
 #include "hashtable.h"
-// #include "siphash.h"
+#include "siphash.h"
 
 static prochash_t* ph_table = NULL;
 
 // pointers to system process frees/thaw functions
 // discovered by kallsyms lookup
-int (*pim_freeze_processes)(void) = 0;
-void (*pim_thaw_processes)(void) =  0;
+static int (*pim_freeze_processes)(void) = 0;
+static void (*pim_thaw_processes)(void) =  0;
 
-// remove dead processes
-static void cleanup_hashtable(void) {
-    pid_t i;
-    for(i = 1; i <= PID_MAX; i++) {
-        if(ph_table[i].start_code) {
-            if(!pid_task(find_vpid(i), PIDTYPE_PID)) { // process finished
-                memset(&ph_table[i], 0, sizeof(prochash_t));
-            }
-        }
-    }
-}
+// SipHash key
+static uint128_t siphash_key;
 
-static void update_hashtable(void) {
-    struct task_struct *task;
-    for_each_process(task) {
-        if(task->mm) { // not a kernel process
-            if(ph_table[task->pid].start_code != task->mm->start_code ||
-               ph_table[task->pid].length != task->mm->end_code - task->mm->start_code) {
-                // no pid or new process
-                ph_table[task->pid].start_code = task->mm->start_code;
-                ph_table[task->pid].length = task->mm->end_code - task->mm->start_code;
-                ph_table[task->pid].count = 0;
-                ph_table[task->pid].siphash = 0;
-            }
-        }
+// init success
+static int init_success = 0;
+
+static int calculate_hash(prochash_t *ph) {
+    size_t n = ph->length;
+
+    if(!ph->text) return ENOMEM;
+
+    n = copy_from_user(ph->text, ph->start_code, ph->length);
+    if(n < ph->length) {
+        pim_siphash64(ph->text, ph->length-n, &siphash_key, (uint8_t*)&ph->siphash);
+        ph->count++;
+        return 0;
     }
+    else return EACCES;
 }
 
 static int pim_init(void) {
     int rv = 0;
+    ktime_t start, end;
+    struct task_struct *task;
     
     printk("Process integrity checking module started\n");
 
@@ -65,12 +62,16 @@ static int pim_init(void) {
         goto init_exit;
     }
 
+    // allocating hash table
     ph_table = (prochash_t*)vzalloc((PID_MAX+1) * sizeof(prochash_t));
     if(!ph_table) {
         printk("PIM: Can not allocate memory for hashtable, exiting\n");
         rv = ENOMEM;
         goto init_exit;
     }
+
+    siphash_key.p_low  = (uint64_t)get_random_long();
+    siphash_key.p_high = (uint64_t)get_random_long();
     
     // Freeze all non-kernel processes
     printk("PIM: INFO: Stopping all non-kernel processes\n");
@@ -78,16 +79,29 @@ static int pim_init(void) {
         schedule();
     
     printk("PIM: INFO: Initializing hash table...\n");
-    printk("PIM: INFO: hash table initialized, %lld ms\n", get_timing_ms(update_hashtable));
+    start = ktime_get();
+    for_each_process(task) {
+        rv = init_ph(ph_table + task->pid, task);
+        if(rv) break;
+    }
+    end = ktime_get();
+    printk("PIM: INFO: hash table initialized, status: %d, elapsed time %lld ms\n",
+           rv, ktime_to_ms(ktime_sub(end, start)));
     
     // Thaw all non-kernel processes
     pim_thaw_processes();
 
 init_exit:
+    init_success = (rv == 0);
     return rv;
 }
 
 static void pim_done(void) {
+    int i;
+    for(i = 1; i <= PID_MAX; i++) {
+        if(ph_table[i].text)
+            vfree(ph_table[i].text);
+    }
     if(ph_table) vfree(ph_table);
     printk("PIM: exiting.\n");
 }
