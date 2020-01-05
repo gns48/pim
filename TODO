@@ -1,0 +1,16 @@
+* Process integrity checker TODO list
+** Add support for /proc (add output to procfs)
+** Refactor printk's and add affordable logging
+** Add command line parameters to define what to do with tampered processes
+** Remove dumps to kernel log
+** Create systend unit and other staff
+** Create packaging staff
+
+* Found bugs:
+
+* Improvements:
+
+* Suggestions:
+
+
+
