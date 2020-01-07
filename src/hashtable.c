@@ -17,10 +17,10 @@
 /** 
  * Initialize hastable entry
  * 
- * @param ph  - ptr to  hastable entry
- * @param task tast ptr
+ * @param ph  - ptr to hastable entry
+ * @param task ptr
  * 
- * @return 0 of ok
+ * @return 0 if ok
  */
 int init_ph(prochash_t *ph, struct task_struct *task) {
     if(task->mm) { // not a kernel process

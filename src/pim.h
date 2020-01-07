@@ -8,6 +8,9 @@
  * 
  */
 
+#ifndef __PIM_H__
+#define __PIM_H__
+
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -19,17 +22,10 @@
 #include <linux/delay.h>
 #include <linux/random.h>
 #include <linux/uaccess.h>
-
 #include "timing.h"
 #include "hashtable.h"
 #include "siphash.h"
 
-
-#ifndef __PIM_H__
-#define __PIM_H__
-
-
-#define MODULO50 50  // At every 50th wake up we dump hash table
-#define 
-
 #endif // #ifndef __PIM_H__
+
+

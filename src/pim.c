@@ -1,46 +1,63 @@
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/sched.h>
-#include <linux/sched/signal.h>
-#include <linux/kallsyms.h>
-#include <linux/mm.h>
-#include <linux/time.h>
-#include <linux/delay.h>
-#include <linux/random.h>
-#include <linux/uaccess.h>
+/**
+ * @file   pim.c
+ * @author Gleb Semenov <gleb.semenov@gmail.com>
+ * @date   Sun Jan  5 21:07:54 2020
+ * 
+ * @brief  User process integrity checker 
+ * 
+ */
 
-#include "timing.h"
-#include "hashtable.h"
-#include "siphash.h"
+#include "pim.h"
 
-static prochash_t* ph_table = NULL;
+/*
+ * local data fefinitions
+ */
 
-// pointers to system process frees/thaw functions
-// discovered by kallsyms lookup
+/* pointers to system process frees/thaw functions
+   discovered by kallsyms lookup */
 static int (*pim_freeze_processes)(void) = 0;
 static void (*pim_thaw_processes)(void) =  0;
 
-// SipHash key
+/* main dada structure: Hash table */
+static prochash_t* ph_table = NULL;
+
+/* SipHash key */
 static uint128_t siphash_key;
 
-// init success
+/* init success */
 static int init_success = 0;
+/* We are getting done */
+static int done_flag = 0;
 
-static int calculate_hash(prochash_t *ph) {
-    size_t n = ph->length;
+/** 
+ * Calculate hash ror hashtable element
+ * Called from timer interrupt in user context
+ * 
+ * @param ph - pointer to hastable element
+ * 
+ * @return 0 is ok
+ */
+int calculate_hash(prochash_t *ph) {
+    size_t n;
 
-    if(!ph->text) return ENOMEM;
-
-    n = copy_from_user(ph->text, ph->start_code, ph->length);
-    if(n < ph->length) {
-        pim_siphash64(ph->text, ph->length-n, &siphash_key, (uint8_t*)&ph->siphash);
-        ph->count++;
-        return 0;
+    if(access_ok(VERIFY_READ, ph->start_code, ph->length)) {
+        n = copy_from_user(ph->text, ph->start_code, ph->length);
+        if(n == 0) {
+            pim_siphash64(ph->text, ph->length, &siphash_key, (uint8_t*)&ph->siphash);
+            if(!ph->count) ph->siphash_old = ph->siphash;
+            ph->count++;
+            return 0;
+        }
     }
-    else return EACCES;
+    return EACCES;
 }
 
+/** 
+ * Module initializer.
+ * Called by kernel module loading routine
+ * 
+ * @return 0 is ok
+ */
 static int pim_init(void) {
     int rv = 0;
     ktime_t start, end;
@@ -96,8 +113,15 @@ init_exit:
     return rv;
 }
 
+/** 
+ * Module destructor
+ * Called by module unloading routine
+ *
+ */
 static void pim_done(void) {
     int i;
+    done_flag = 1;
+    
     for(i = 1; i <= PID_MAX; i++) {
         if(ph_table[i].text)
             vfree(ph_table[i].text);
@@ -106,10 +130,23 @@ static void pim_done(void) {
     printk("PIM: exiting.\n");
 }
 
+/*
+ * Module loading stuff
+ */
+
 module_init(pim_init);
 module_exit(pim_done);
 
 MODULE_AUTHOR ("Gleb Semenov");
 MODULE_DESCRIPTION ("User processes integrity checker");
 MODULE_LICENSE("GPL");
+
+
+
+
+
+
+
+
+
 

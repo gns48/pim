@@ -29,6 +29,7 @@ typedef struct proc_hash {
 
 int init_ph(prochash_t *ph, struct task_struct *task);
 void cleanup_and_dump_hashtable(prochash_t* ph_table);
+int calculate_hash(prochash_t *ph);
 
 #endif // #ifndef __HASHTABLE_H__
 

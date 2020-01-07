@@ -5,6 +5,7 @@
 ** Remove dumps to kernel log
 ** Create systend unit and other staff
 ** Create packaging staff
+** Improve error handling
 
 * Found bugs:
 
