@@ -1,8 +1,9 @@
 * Process integrity checker TODO list
-** Refactor printk's and add affordable logging
+** URGENT: Make it full-functional, and add syscall interceptors
+** Refactor printk's, and add affordable logging
 ** Add command line parameters to define what to do with tampered processes
 ** Remove dumps to kernel log
-** Create systemd unit and other staff
+** Create systemd unit, and other staff
 ** Create packaging staff
 ** Improve error handling
 
@@ -10,7 +11,7 @@
 ** Ho handling for dynamic expansion/shrink of available PIDs range
 
 * Improvements:
-** Add support for /proc, output of hashtable to procfs
+** Add support for /proc, and output of hashtable to procfs
 ** Add managed list of processes to inspect
 ** Add some kernel inspect hacks from LKRG
 
