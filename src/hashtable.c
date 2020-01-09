@@ -24,18 +24,16 @@
  * @return 0 if ok
  */
 int init_ph(prochash_t *ph, struct task_struct *task) {
-    if(task->mm) { // not a kernel process
-        ph->start_code = (uint8_t*)task->mm->start_code;
-        ph->length     = (size_t)task->mm->end_code - (size_t)task->mm->start_code;
-        ph->text       = (uint8_t*)vzalloc(ph->length);
-        if(!ph->text) {
-            kerror("can not allocate code segment for %d[%s]\n", task->pid, task->comm);
-            return ENOMEM;
-        }
-        ph->count = 0ul;
-        ph->siphash = 0ull;
-        strcpy(ph->comm, task->comm);
+    ph->start_code = (uint8_t*)task->mm->start_code;
+    ph->length     = (size_t)task->mm->end_code - (size_t)task->mm->start_code;
+    ph->text       = (uint8_t*)vzalloc(ph->length);
+    if(!ph->text) {
+        kerror("can not allocate code segment for %d[%s]\n", task->pid, task->comm);
+        return ENOMEM;
     }
+    ph->count = 0ul;
+    ph->siphash = 0ull;
+    strcpy(ph->comm, task->comm);
     return 0;
 }
 

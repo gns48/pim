@@ -61,6 +61,7 @@ int calculate_hash(prochash_t *ph) {
 static int pim_init(void) {
     int rv = 0;
     ktime_t start, end;
+    int total_counter, user_counter;
     struct task_struct *task;
     
     kinfo("Process integrity monitor started\n");
@@ -96,14 +97,19 @@ static int pim_init(void) {
         schedule();
     
     kinfo("Initializing hash table...\n");
+    total_counter =  user_counter = 0;
     start = ktime_get();
     for_each_process(task) {
-        rv = init_ph(ph_table + task->pid, task);
-        if(rv) break;
+        total_counter++;
+        if(task->mm) { // not a kernel process
+            user_counter++;
+            rv = init_ph(ph_table + task->pid, task);
+            if(rv) break;
+        }
     }
     end = ktime_get();
-    kinfo("hash table initialized, status: %d, elapsed time %lld ms\n",
-           rv, ktime_to_ms(ktime_sub(end, start)));
+    kinfo("hash table initialized %d out of %d processes, status: %d, elapsed time %lld ms\n",
+          user_counter, total_counter, rv, ktime_to_ms(ktime_sub(end, start)));
     
     // Thaw all non-kernel processes
     pim_thaw_processes();
