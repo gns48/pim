@@ -1,6 +1,6 @@
 * Process integrity checker TODO list
 ** URGENT: Make it full-functional, and add syscall interceptors
-** Refactor printk's, and add affordable logging
+** DONE Refactor printk's, and add affordable logging
 ** Add command line parameters to define what to do with tampered processes
 ** Create systemd unit, and other staff
 ** Create packaging staff
