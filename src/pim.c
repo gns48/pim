@@ -63,18 +63,18 @@ static int pim_init(void) {
     ktime_t start, end;
     struct task_struct *task;
     
-    printk("Process integrity checking module started\n");
+    kinfo("Process integrity monitor started\n");
 
     pim_freeze_processes = (int (*)(void))kallsyms_lookup_name("freeze_processes");
     if(!pim_freeze_processes) {
-        printk("PIM: ERROR: Can't find 'freeze_processes' function. Exiting...\n");
+        kerror("Can't find 'freeze_processes' function. Exiting...\n");
         rv = ENOENT;
         goto init_exit;
     }
 
     pim_thaw_processes = (void (*)(void))kallsyms_lookup_name("thaw_processes");
     if(!pim_thaw_processes) {
-        printk("PIM: ERROR: Can't find 'thaw_processes' function. Exiting...\n");
+        kerror("Can't find 'thaw_processes' function. Exiting...\n");
         rv = ENOENT;
         goto init_exit;
     }
@@ -82,7 +82,7 @@ static int pim_init(void) {
     // allocating hash table
     ph_table = (prochash_t*)vzalloc((PID_MAX+1) * sizeof(prochash_t));
     if(!ph_table) {
-        printk("PIM: Can not allocate memory for hashtable, exiting\n");
+        kerror("Can not allocate memory for hashtable, exiting\n");
         rv = ENOMEM;
         goto init_exit;
     }
@@ -91,18 +91,18 @@ static int pim_init(void) {
     siphash_key.p_high = (uint64_t)get_random_long();
     
     // Freeze all non-kernel processes
-    printk("PIM: INFO: Stopping all non-kernel processes\n");
+    kinfo("Stopping all non-kernel processes\n");
     while (pim_freeze_processes())
         schedule();
     
-    printk("PIM: INFO: Initializing hash table...\n");
+    kinfo("Initializing hash table...\n");
     start = ktime_get();
     for_each_process(task) {
         rv = init_ph(ph_table + task->pid, task);
         if(rv) break;
     }
     end = ktime_get();
-    printk("PIM: INFO: hash table initialized, status: %d, elapsed time %lld ms\n",
+    kinfo("hash table initialized, status: %d, elapsed time %lld ms\n",
            rv, ktime_to_ms(ktime_sub(end, start)));
     
     // Thaw all non-kernel processes
@@ -127,7 +127,7 @@ static void pim_done(void) {
             vfree(ph_table[i].text);
     }
     if(ph_table) vfree(ph_table);
-    printk("PIM: exiting.\n");
+    kinfo("Process integrity monitor exiting.\n");
 }
 
 /*

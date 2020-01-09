@@ -25,6 +25,7 @@
 #include "timing.h"
 #include "hashtable.h"
 #include "siphash.h"
+#include "pimlog.h"
 
 #endif // #ifndef __PIM_H__
 

@@ -3,7 +3,7 @@ P_KVER ?= $(shell uname -r)
 P_KERNEL := /lib/modules/$(P_KVER)/build
 
 obj-m += pim.o
-pim-objs += src/pim.o src/siphash.o  src/hashtable.o
+pim-objs += src/pim.o src/siphash.o src/hashtable.o
 
 all:
 	$(MAKE) -C $(P_KERNEL) M=$(P_PWD) modules

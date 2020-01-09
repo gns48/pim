@@ -2,7 +2,6 @@
 ** URGENT: Make it full-functional, and add syscall interceptors
 ** Refactor printk's, and add affordable logging
 ** Add command line parameters to define what to do with tampered processes
-** Remove dumps to kernel log
 ** Create systemd unit, and other staff
 ** Create packaging staff
 ** Improve error handling
@@ -14,6 +13,8 @@
 ** Add support for /proc, and output of hashtable to procfs
 ** Add managed list of processes to inspect
 ** Add some kernel inspect hacks from LKRG
+** Defer hash calculation from syscall handler by adding workqueues, and
+   deferred tasks
 
 * Suggestions:
 
