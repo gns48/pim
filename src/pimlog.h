@@ -14,9 +14,9 @@
 
 #define MOD_SIGNATURE "PIM: "
 
-#define kinfo(fmt, args...)    printk(MOD_SIGNATURE "Info: " fmt, ## args)
-#define kwarning(fmt, args...) printk(MOD_SIGNATURE "Warning: " fmt, ## args)
-#define kerror(fmt, args...)   printk(MOD_SIGNATURE "Error: " fmt, ## args)
-#define kcrit(fmt, args...)    printk(MOD_SIGNATURE "Critical: " fmt, ## args)
+#define kinfo(fmt, args...)    printk(KERN_INFO MOD_SIGNATURE "Info: " fmt, ## args)
+#define kwarning(fmt, args...) printk(KERN_WARNING MOD_SIGNATURE "Warning: " fmt, ## args)
+#define kerror(fmt, args...)   printk(KERN_ERR MOD_SIGNATURE "Error: " fmt, ## args)
+#define kcrit(fmt, args...)    printk(KERN_CRIT MOD_SIGNATURE "Crit: " fmt, ## args)
 
 #endif // #ifndef __PIMLOG_H__
