@@ -3,14 +3,14 @@
  * @author Gleb Semenov <gleb.semenov@gmail.com>
  * @date   Sun Jan  5 21:07:54 2020
  * 
- * @brief  User process integrity checker 
+ * @brief  User process integrity monitor
  * 
  */
 
 #include "pim.h"
 
 /*
- * local data fefinitions
+ * local data definitions
  */
 
 /* pointers to system process frees/thaw functions
@@ -29,28 +29,6 @@ static int init_success = 0;
 /* We are getting done */
 static int done_flag = 0;
 
-/** 
- * Calculate hash ror hashtable element
- * Called from timer interrupt in user context
- * 
- * @param ph - pointer to hastable element
- * 
- * @return 0 is ok
- */
-int calculate_hash(prochash_t *ph) {
-    size_t n;
-
-    if(access_ok(VERIFY_READ, ph->start_code, ph->length)) {
-        n = copy_from_user(ph->text, ph->start_code, ph->length);
-        if(n == 0) {
-            pim_siphash64(ph->text, ph->length, &siphash_key, (uint8_t*)&ph->siphash);
-            if(!ph->count) ph->siphash_old = ph->siphash;
-            ph->count++;
-            return 0;
-        }
-    }
-    return EACCES;
-}
 
 /** 
  * Module initializer.
@@ -128,10 +106,9 @@ static void pim_done(void) {
     int i;
     done_flag = 1;
     
-    for(i = 1; i <= PID_MAX; i++) {
-        if(ph_table[i].text)
-            vfree(ph_table[i].text);
-    }
+    for(i = 1; i <= PID_MAX; i++) 
+        if(ph_table[i].text) vfree(ph_table[i].text);
+
     if(ph_table) vfree(ph_table);
     kinfo("Process integrity monitor exiting.\n");
 }
@@ -143,8 +120,9 @@ static void pim_done(void) {
 module_init(pim_init);
 module_exit(pim_done);
 
-MODULE_AUTHOR ("Gleb Semenov");
-MODULE_DESCRIPTION ("User processes integrity checker");
+MODULE_AUTHOR ("Gleb Semenov, gleb.semenov@gmail.com");
+MODULE_DESCRIPTION ("User processes integrity monitor");
+MODULE_VERSION("0.1alpha");
 MODULE_LICENSE("GPL");
 
 

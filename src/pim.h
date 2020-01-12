@@ -23,8 +23,8 @@
 #include <linux/random.h>
 #include <linux/uaccess.h>
 #include "timing.h"
-#include "hashtable.h"
 #include "siphash.h"
+#include "hashtable.h"
 #include "pimlog.h"
 
 #endif // #ifndef __PIM_H__

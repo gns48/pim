@@ -1,13 +1,11 @@
 /**
- * pi3's Linux kernel Runtime Guard
- *
- * Component:
- *  - Hashing algorithm module - SipHash
- *
- * Notes:
- *  - Current Algorithm:
- *     https://131002.net/siphash/
- *
+ * @file   siphash.c
+ * @author https://131002.net/siphash/
+ * @date   Thu Jan  9 19:28:58 2020
+ * 
+ * @brief  Hashing algorithm module - SipHash, 64 bit version
+ * 
+ * 
  */
 
 #include <linux/types.h>
@@ -58,7 +56,16 @@ static const uint64_t V1 = 0x646f72616e646f6dULL;
 static const uint64_t V2 = 0x6c7967656e657261ULL;
 static const uint64_t V3 = 0x7465646279746573ULL;
     
-// Siphash, 64 bit version
+/** 
+ * pim_siphash64 - calculate SipHash for given block of data
+ * 
+ * @param in - ptr to data
+ * @param inlen - data length
+ * @param k - key
+ * @param out - Hash value as array of bytes
+ * 
+ * @return  Hash value as 64 bit long unsigned integer
+ */
 uint64_t pim_siphash64(const uint8_t *in, const size_t inlen, const uint128_t *k, uint8_t *out) {
     uint64_t v0 = V0;
     uint64_t v1 = V1;

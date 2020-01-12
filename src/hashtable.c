@@ -7,13 +7,7 @@
  * 
  */
 
-#include <linux/init.h>
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/sched.h>
-#include <linux/mm.h>
-#include "hashtable.h"
-#include "pimlog.h"
+#include "pim.h"
 
 /** 
  * Initialize hastable entry
@@ -62,3 +56,27 @@ void cleanup_and_dump_hashtable(prochash_t* ph_table) {
         }
     }
 }
+
+/** 
+ * Calculate hash ror hashtable element
+ * Called from timer interrupt in user context
+ * 
+ * @param ph - pointer to hastable element
+ * 
+ * @return 0 is ok
+ */
+int calculate_hash(prochash_t *ph,  const uint128_t *k) {
+    size_t n;
+
+    if(access_ok(VERIFY_READ, ph->start_code, ph->length)) {
+        n = copy_from_user(ph->text, ph->start_code, ph->length);
+        if(n == 0) {
+            pim_siphash64(ph->text, ph->length, k, (uint8_t*)&ph->siphash);
+            if(!ph->count) ph->siphash_old = ph->siphash;
+            ph->count++;
+            return 0;
+        }
+    }
+    return EACCES;
+}
+

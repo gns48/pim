@@ -15,6 +15,7 @@
 #define PID_MAX 32768
 #endif
 
+
 // process code segment integrity data array element
 // indexed by pid
 typedef struct proc_hash {
@@ -29,7 +30,7 @@ typedef struct proc_hash {
 
 int init_ph(prochash_t *ph, struct task_struct *task);
 void cleanup_and_dump_hashtable(prochash_t* ph_table);
-int calculate_hash(prochash_t *ph);
+int calculate_hash(prochash_t *ph, const uint128_t *k);
 
 #endif // #ifndef __HASHTABLE_H__
 
