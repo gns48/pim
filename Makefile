@@ -9,7 +9,7 @@ all:
 	$(MAKE) -C $(P_KERNEL) M=$(P_PWD) modules
 
 clean:
-	rm -f *~ src/*~
+	rm -f *~ src/*~ doc/*~
 	$(MAKE) -C $(P_KERNEL) M=$(P_PWD) clean
 	$(RM) Module.markers modules.order
 	$(RM) $(P_PWD)/src/modules/kmod/client/kmod/Module.markers
