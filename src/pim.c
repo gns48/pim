@@ -29,7 +29,6 @@ static int init_success = 0;
 /* We are getting done */
 static int done_flag = 0;
 
-
 /** 
  * Module initializer.
  * Called by kernel module loading routine

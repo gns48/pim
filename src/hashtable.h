@@ -15,6 +15,8 @@
 #define PID_MAX 32768
 #endif
 
+// minimum time interval between hash calculations for the same process
+#define HASH_INTERVAL 5
 
 // process code segment integrity data array element
 // indexed by pid
@@ -22,9 +24,10 @@ typedef struct proc_hash {
     uint8_t* start_code;   // start of code segment
     uint8_t* text;         // code segment in kernel space
     size_t length;         // length of code segment
-    unsigned long count;   // hashcount runs counter
-    unsigned long siphash; // process code segment hash value
-    unsigned long siphash_old; // process code segment old hash value
+    uint64_t count;        // hashcount runs counter
+    int64_t  timestamp;    // last time of hash calculation
+    uint64_t siphash;      // process code segment hash value
+    uint64_t siphash_old;  // process code segment old hash value
     char comm[TASK_COMM_LEN]; // task name
 } prochash_t;
 
@@ -33,4 +36,6 @@ void cleanup_and_dump_hashtable(prochash_t* ph_table);
 int calculate_hash(prochash_t *ph, const uint128_t *k);
 
 #endif // #ifndef __HASHTABLE_H__
+
+
 

@@ -1,6 +1,13 @@
+2020-01-16  Gleb Semenov  <gleb.semenov@gmail.com>
+
+	* doc/'syscall tracing.odt': added
+
 2020-01-15  Gleb Semenov  <gleb.semenov@gmail.com>
 
-	* The LICENSE file added, the ChangeLog file added
+	* src/hashtable.h: timestamp field added to the prochash struct
+	* LICENSE: file added
+	* ChangeLog: file added
+	* doc/'userspace memory access.odt': file added
 
 Copyright © 2020 Gleb Semenov
 Unfinished work, not yet for distribution.

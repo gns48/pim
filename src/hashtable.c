@@ -46,7 +46,7 @@ void cleanup_and_dump_hashtable(prochash_t* ph_table) {
                 kinfo("%6d Process is dead, removed\n", i);
             }
             else {
-                kinfo("%6d %10ld %10ld %08lX %08lX %s", i,
+                kinfo("%6d %10ld %10lld %08llX %08llX %s", i,
                        ph_table[i].length,
                        ph_table[i].count,
                        ph_table[i].siphash,
