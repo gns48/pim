@@ -1,0 +1,33 @@
+# User processes integrity checker
+<2020-01-05 >
+
+This kernel module periodically checks the running processes code segments.
+
+## Theoretical prerequisites:
+
+- Read the "Understanding the linux kernel" book
+- Read the Linux Kernel Module Programming Guide
+- Read the  Understanding the Linux Virtual Memory Manager book
+
+## Practical prerequisites:
+
+```
+    bash
+    apt-get install build-essential linux-headers-`uname -r`
+```
+
+## Build process:
+
+- type make
+- type make package
+- install package onto Your system
+
+
+
+
+
+
+
+
+
+
